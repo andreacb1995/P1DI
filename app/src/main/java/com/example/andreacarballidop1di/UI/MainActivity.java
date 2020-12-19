@@ -1,17 +1,13 @@
 package com.example.andreacarballidop1di.UI;
 
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,22 +20,20 @@ import com.example.andreacarballidop1di.R;
 import com.example.andreacarballidop1di.core.Tarea;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements MyRecyclerViewAdapter.ItemClickListener {
+public class MainActivity extends AppCompatActivity implements AccionesTarea{
 
     TextView fecha;
-    Calendar calendar= Calendar.getInstance();
-    int year = calendar.get(Calendar.YEAR);
-    int month = calendar.get(Calendar.MONTH);
-    int day = calendar.get(Calendar.DAY_OF_MONTH);
-
+    Tarea tareaModifico;
     MyRecyclerViewAdapter adapter;
     ArrayList<Tarea> listaTareas;
-    ArrayList<Tarea> tareas;
+    List<Tarea> tareas;
     ArrayList<Tarea> tareasfinalizadas;
 
     @Override
@@ -50,175 +44,111 @@ public class MainActivity extends AppCompatActivity implements MyRecyclerViewAda
         FloatingActionButton btAdd = findViewById(R.id.btAdd);
 
         tareas  = new ArrayList<>();
-        RecyclerView recyclerView = findViewById(R.id.rvTarea);
+        RecyclerView recyclerView = findViewById(R.id.rvTareas);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MyRecyclerViewAdapter(this, tareas);
-        adapter.setClickListener(this);
-
-        this.registerForContextMenu( recyclerView );
-        recyclerView.setLongClickable( true );
+        adapter = new MyRecyclerViewAdapter(tareas,this);
         recyclerView.setAdapter(adapter);
-
-
 
 
         btAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MainActivity.this.onAdd();
+                MainActivity.this.onAdd(null);
             }
         });
     }
 
 
-    @Override
-    public void onItemClick(View view, int position) {
-//        Toast.makeText(this, "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
 
-    }
+   private void onAdd(final Tarea tareaModifico) {
+
+     final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+       final View dialogLayout = getLayoutInflater().inflate(R.layout.dialog_tareanueva, null);
+       builder.setView(dialogLayout);
+
+       final TextView tvFecha = dialogLayout.findViewById(R.id.tvFecha);
+       final EditText tvTarea = dialogLayout.findViewById(R.id.edTarea);
+
+      final Calendar calendar = Calendar.getInstance();
+       if (tareaModifico != null) {
+           String tareaT = String.valueOf(tareaModifico.getTextotarea());
+           String fecha = String.valueOf(tareaModifico.getFormatoFecha());
+           tvFecha.setText(fecha);
+           calendar.setTime(tareaModifico.getFecha());
+           tvTarea.setText(tareaT);
+
+       }
+
+       tvFecha.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+
+               int day = calendar.get(Calendar.DAY_OF_MONTH);
+               int month = calendar.get(Calendar.MONTH);
+               int year = calendar.get(Calendar.YEAR);
+
+               final DatePickerDialog datePicker = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+
+                   @Override
+                   public void onDateSet(DatePicker datePicker, int selectedYear, int selectedMonth, int selectedDay) {
+                       calendar.set(Calendar.YEAR, selectedYear);
+                       calendar.set(Calendar.MONTH, selectedMonth);
+                       calendar.set(Calendar.DAY_OF_MONTH, selectedDay);
+
+                       SimpleDateFormat formatoFecha = new SimpleDateFormat("dd MMMM 'de' yyyy", Locale.getDefault());
+                       tvFecha.setText(formatoFecha.format(calendar.getTime()));
+                   }
+               }, year, month, day);
+
+               datePicker.show();
+           }
+       });
 
 
-   private void onAdd() {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder( this );
-        builder.setTitle("Nueva tarea");
-        builder.setMessage( "Introduce el nombre de la tarea y la fecha límite asociada" );
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-
-
-       String pattern = "dd-MM-yyyy";
-       final View customLayout = getLayoutInflater().inflate(R.layout.dialog_tareanueva,null);
-       builder.setView(customLayout);
-//     builder.setTitle(R.string.alDiag_train);
-
-       final EditText tarea = new EditText( this );
-        layout.addView(tarea);
-        tarea.setHint("Tarea");
-
-       fecha = new TextView( this );
-           fecha.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDialog(0);
-
-            }
-        });
-
-        fecha.setHint("Fecha");
-        layout.addView(fecha);
-
-        builder.setView(layout );
-        builder.setPositiveButton( "+", new DialogInterface.OnClickListener() {
+       builder.setPositiveButton( "Añadir tarea", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                final String text = tarea.getText().toString();
-                final String text2 = fecha.getText().toString();
-                String t= String.valueOf(text);
+
+                String tTarea = tvTarea.getText().toString();
+
+                if ( tvFecha.getText().toString().length()<=0 && tTarea.equals("")){
+                    Toast.makeText(MainActivity.this, "No se permiten los campos vacíos", Toast.LENGTH_SHORT).show();
+                    return;
+
+                }
+                if(tvFecha.getText().toString().length()<=0){
+                    Toast.makeText(MainActivity.this, "Debe escoger una fecha", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if(tTarea.equals("")){
+
+                    Toast.makeText(MainActivity.this,  "Campo de la tarea vacío", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
 
-                String f= String.valueOf(text2);
+                if (tareaModifico == null) {
+                    Tarea tarea = new Tarea(calendar.getTime(),tTarea);
+                    tareas.add(tarea);
+                    Toast.makeText(MainActivity.this, "Tarea añadida", Toast.LENGTH_SHORT).show();
+                } else {
+                    tareaModifico.modificarTarea(calendar.getTime(),tTarea);
 
-
-                Tarea tarea1= new Tarea(t,f);
-                tareas.add(tarea1);
+                    Toast.makeText(MainActivity.this, "Tarea modificada", Toast.LENGTH_SHORT).show();
+                }
                 adapter.notifyDataSetChanged();
+
+
 
             }
         });
-        builder.setNegativeButton("Cancel", null);
+        builder.setNegativeButton("Cancelar", null);
         builder.create().show();
     }
 
-    @Override
-    @Deprecated
-    protected Dialog onCreateDialog(int id) {
-        return new DatePickerDialog(this, datePickerListener, year, month, day);
-
-    }
-
-    private DatePickerDialog.OnDateSetListener datePickerListener = new DatePickerDialog.OnDateSetListener() {
-        public void onDateSet(DatePicker view, int selectedYear,
-                              int selectedMonth, int selectedDay) {
-            day = selectedDay;
-            month = selectedMonth;
-            year = selectedYear;
-            fecha.setText(day+"/"+(month+1)+"/"+year);
-
-        }
-
-    };
 
 
-    @Override
-    public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo cmi)
-    {
-        if ( view.getId() == R.id.rvTarea)
-        {
-            this.getMenuInflater().inflate( R.menu.context_menu, contextMenu );
-            contextMenu.setHeaderTitle( "Menú contextual" );
-        }
-    }
-    @Override
-    public boolean onContextItemSelected(MenuItem menuItem)
-    {
-        final AdapterView.AdapterContextMenuInfo info =
-                (AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo();
-
-        boolean toret = false;
-
-        switch( menuItem.getItemId() ) {
-            case R.id.modificartarea:
-
-                final EditText editText = new EditText(MainActivity.this);
-                editText.setText(MainActivity.this.tareas.get(info.position).toString());
-
-                if (info.position>=0){
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setTitle("Modificar");
-                    builder.setView(editText);
-                    builder.setNegativeButton("Cancelar",null);
-                    builder.setPositiveButton("Modificar", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            //cambiar los datos en el arraylist,al cambiar los datos hacer de nuevo los calculos de las estadisticas
-//
-//                            MainActivity.this.tareas.set(info.position,editText.getText().toString());
-
-                            MainActivity.this.adapter.notifyDataSetChanged();
-                        }
-
-                    });
-                    builder.create().show();
-                }
-                toret = true;
-                break;
-            case R.id.eliminartarea:
-                if (info.position >= 0 ) {
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setTitle("Borrar Elemento");
-                    builder.setMessage("Seguro que quieres borrar el elemento: '" + MainActivity.this.tareas.get(info.position).toString() +"'?");
-                    builder.setPositiveButton("Borrar",new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            MainActivity.this.tareas.remove( info.position );
-
-                            MainActivity.this.adapter.notifyDataSetChanged();
-
-                        }
-                    });
-                    builder.setNegativeButton("Cancelar", null);
-                    builder.create().show();
-
-                }
-                toret = true;
-                break;
-        }
-
-        return toret;
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
@@ -237,114 +167,130 @@ public class MainActivity extends AppCompatActivity implements MyRecyclerViewAda
 
         switch( menuItem.getItemId() ) {
             case R.id.añadirnuevatarea:
-                onAdd();
+                onAdd(null);
                 toret = true;
                 break;
-            case R.id.modificartarea:
-               Modificar();
+            case R.id.modificar:
+               modificarTareas();
                 toret = true;
                 break;
             case R.id.eliminar:
-                Eliminar();
+                eliminarTareas();
                 toret = true;
                 break;
-
         }
-
         return toret;
 
     }
 
-    private  void Modificar(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        final CharSequence[] items = new CharSequence[tareas.size()];
 
-        for(int i = 0; i < tareas.size(); i++){
+    private void modificarTareas(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Modificar tarea");
 
-            items[i] = "\nTarea: " + tareas.get(i).getTextotarea() + ", Fecha:  "
-                    + tareas.get(i).getFecha();
-
+        final String[] arrayTareas = new String[tareas.size()];
+        final boolean[] eleccionTareas = new boolean[tareas.size()];
+        for (int i = 0; i < tareas.size(); i++) {
+            arrayTareas[i] = tareas.get(i).getFormatoFecha() + ", " + tareas.get(i).getTextotarea();
         }
 
-        builder.setTitle("Modificar tarea")
-                .setItems(items, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-//                        MainActivity.this.tareas.set(items[which].getText().toString());
+        builder.setSingleChoiceItems(arrayTareas, -1, new DialogInterface.OnClickListener() {
 
-                        Toast.makeText(
-                                MainActivity.this,
-                                "Seleccionaste:" + items[which],
-                                Toast.LENGTH_SHORT)
-                                .show();
-                    }
-                });
+            @Override
+            public void onClick(DialogInterface dialog, int i) {
+                tareaModifico = tareas.get(i);
+            }
+        });
+        builder.setPositiveButton("Modificar", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(final DialogInterface dialog, final int i) {
+                if (tareaModifico == null) {
+                    Toast.makeText(MainActivity.this, "No ha seleccionado una tarea", Toast.LENGTH_SHORT).show();
+                } else {
+                    onAdd(tareaModifico);
+                }
+            }
+
+        });
+        builder.setNegativeButton("Cancelar", null);
         builder.create().show();
-
-
-
     }
 
 
-    private void Eliminar() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    @Override
+    public void modificar(Tarea tarea) {
+        onAdd(tarea);
+    }
 
-        final CharSequence[] items = new CharSequence[tareas.size()];
+    @Override
+    public void eliminar(final Tarea tarea) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Borrar Elemento");
+        builder.setMessage("Está seguro de que desea eliminar este elemento?\n\n" + tarea.eliminarTarea());
+        builder.setPositiveButton("Sí", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                tareas.remove(tarea);
+                Toast.makeText(MainActivity.this, "Tarea eliminada correctamente", Toast.LENGTH_SHORT).show();
+                adapter.notifyDataSetChanged();
+            }
 
-        for(int i = 0; i < tareas.size(); i++)
-            items[i] = "\nTarea: " + tareas.get(i).getTextotarea() + ", Fecha:  "
-                    + tareas.get(i).getFecha();
+        });
+
+        builder.setNegativeButton("No", null);
+        builder.create().show();
+    }
 
 
-        final ArrayList itemsSeleccionados = new ArrayList();
 
 
-        builder.setTitle("Selecciona la tarea que deseas eliminar")
-                .setMultiChoiceItems(items, null, new DialogInterface.OnMultiChoiceClickListener() {
+    private void eliminarTareas() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Eliminar tareas");
+
+        String[] stringTareas = new String[tareas.size()];
+        final boolean[] tareaseleccion = new boolean[tareas.size()];
+        for (int i = 0; i < tareas.size(); i++) {
+            stringTareas[i] = tareas.get(i).getFormatoFecha() + ", " + tareas.get(i).getTextotarea();
+        }
+        builder.setMultiChoiceItems(stringTareas, tareaseleccion, new DialogInterface.OnMultiChoiceClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int i, boolean isChecked) {
+                tareaseleccion[i] = isChecked;
+            }
+        });
+        builder.setPositiveButton("Sí", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(final DialogInterface dialog, int which) {
+                AlertDialog.Builder buildereliminar = new AlertDialog.Builder(MainActivity.this);
+                buildereliminar.setMessage("¿Está seguro de que desea eliminar los elementos?");
+                buildereliminar.setNegativeButton("No", null);
+                buildereliminar.setPositiveButton("Sí", new DialogInterface.OnClickListener() {
+
+
                     @Override
-                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                    public void onClick(DialogInterface dialogInterface, int which) {
 
-                        if (isChecked) {
-                            // Guardar indice seleccionado
-                            itemsSeleccionados.add(which);
-                            Toast.makeText(
-                                    MainActivity.this,
-                                    "Checks seleccionados:(" + itemsSeleccionados.size() + ")",
-                                    Toast.LENGTH_SHORT)
-                                    .show();
-                        } else if (itemsSeleccionados.contains(which)) {
-                            // Remover indice sin selección
-                            itemsSeleccionados.remove(Integer.valueOf(which));
+                        for (int i = tareas.size() - 1; i >= 0; i--) {
+                            if (tareaseleccion[i]) {
+                                tareas.remove(i);
+
+                            }
                         }
+                        Toast.makeText(MainActivity.this, "Tareas eliminadas correctamente", Toast.LENGTH_SHORT).show();
+                        MainActivity.this.adapter.notifyDataSetChanged();
+
                     }
                 });
-
-        AlertDialog.Builder builder2 = new AlertDialog.Builder(MainActivity.this);
-         builder.setPositiveButton("Eliminar", new DialogInterface.OnClickListener() {
-             @Override
-             public void onClick(final DialogInterface dialog, int which) {
-                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                 builder.setTitle("¿Eliminar el elemento?");
-                 AlertDialog.Builder buildereliminar = new AlertDialog.Builder(MainActivity.this);
-                 buildereliminar.setMessage("¿Eliminar los elementos?");
-                                    buildereliminar.setNegativeButton("Cancelar", null);
-                                    buildereliminar.setPositiveButton("Borrar", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int which) {
-
-                                            Toast.makeText(MainActivity.this, "Tareas eliminadas", Toast.LENGTH_SHORT).show();
-                                            MainActivity.this.adapter.notifyDataSetChanged();
-                                        }
-                                    });
-                                    buildereliminar.create().show();
-                                }
-                            });
-        builder.setNegativeButton("Cancelar", null);
+                buildereliminar.create().show();
+            }
+        });
+        builder.setNegativeButton("No", null);
         builder.create().show();
-                        }
 
-
+    }
 
 
     @Override
@@ -353,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements MyRecyclerViewAda
         super.onResume();
 
         for (Tarea t : tareas) {
-            if (t.getFecha().compareTo(String.valueOf(new Date())) < 0) {
+            if (t.getFecha().compareTo(new Date()) < 0) {
                 tareasfinalizadas.add(t);
             }
         }
@@ -363,9 +309,8 @@ public class MainActivity extends AppCompatActivity implements MyRecyclerViewAda
     }
 
 
-
-    private void tareasCaducadas(final List<Tarea> tareasFinalizadas) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    private void tareasCaducadas(final List<Tarea> tareasfinalizadas) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Tareas Finalizadas");
         ArrayList<String> listatareasfinalizadas = new  ArrayList<String>();
         String[] stringtareas = new String[tareasfinalizadas.size()];
@@ -373,8 +318,8 @@ public class MainActivity extends AppCompatActivity implements MyRecyclerViewAda
         final boolean[] tareaseleccion = new boolean[tareasfinalizadas.size()];
 
         for (int i = 0; i < tareasfinalizadas.size(); i++) {
-           stringtareas[i] = " Tarea: " + tareasfinalizadas.get(i).getTextotarea() + " Fecha:  "
-                    + tareasfinalizadas.get(i).getFecha();
+           stringtareas[i] = "Tarea: " + tareasfinalizadas.get(i).getTextotarea() + "\nFecha: "
+                    + tareasfinalizadas.get(i).getFormatoFecha();
             tareaseliminar =  stringtareas[i];
         }
         builder.setMultiChoiceItems(stringtareas, tareaseleccion, new DialogInterface.OnMultiChoiceClickListener() {
@@ -398,10 +343,10 @@ public class MainActivity extends AppCompatActivity implements MyRecyclerViewAda
                     public void onClick(DialogInterface dialogInterface, int which) {
                         for (int i = tareasfinalizadas.size() - 1; i >= 0; i--) {
                             if (tareaseleccion[i]) {
-                                listaTareas.remove(tareasfinalizadas.get(i));
+                                tareas.remove(tareasfinalizadas.get(i));
                             }
                         }
-                        Toast.makeText(MainActivity.this, "Tareas eliminadas", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Tareas eliminadas correctamente", Toast.LENGTH_SHORT).show();
                         MainActivity.this.adapter.notifyDataSetChanged();
                     }
                 });
@@ -411,5 +356,8 @@ public class MainActivity extends AppCompatActivity implements MyRecyclerViewAda
         builder.setNegativeButton("Cancelar", null);
         builder.create().show();
     }
+
+
+
 
 }

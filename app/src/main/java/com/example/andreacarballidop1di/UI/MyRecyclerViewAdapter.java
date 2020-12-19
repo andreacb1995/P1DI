@@ -1,80 +1,117 @@
 package com.example.andreacarballidop1di.UI;
 
 import android.content.Context;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.andreacarballidop1di.R;
 import com.example.andreacarballidop1di.core.Tarea;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
-    private ArrayList<Tarea> mData;
-    private LayoutInflater mInflater;
-    private ItemClickListener mClickListener;
+    private Context context;
+    private List<Tarea> items;
+    private AccionesTarea accionesTarea;
 
-    // data is passed into the constructor
-    MyRecyclerViewAdapter(Context context, ArrayList<Tarea> data) {
-        this.mInflater = LayoutInflater.from(context);
-        this.mData = data;
+    MyRecyclerViewAdapter(List<Tarea> items, AccionesTarea accionesTarea) {
+        this.items=items;
+        this.accionesTarea=accionesTarea;
+        this.context = context;
     }
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
+        private AccionesTarea accionesTarea;
+        // Campos respectivos de un item
+        private CardView cv;
+        private TextView fecha;
+        private TextView textotarea;
+        private ImageView imagen;
+
+        public ViewHolder(View v,AccionesTarea accionesTarea) {
+            super(v);
+
+            cv= (CardView) v.findViewById(R.id.cv);
+            fecha = (TextView) v.findViewById(R.id.tv_card_Fecha);
+            textotarea = (TextView) v.findViewById(R.id.tv_card_Tarea);
+            imagen= (ImageView)v.findViewById(R.id.imagen);
+            this.accionesTarea = accionesTarea;
+
+
+        }
+
+        public void mostrarTarea(final Tarea tarea) {
+
+            fecha.setText(tarea.getFormatoFecha());
+            textotarea.setText(tarea.getTextotarea());
+
+            cv.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v){
+                    PopupMenu popup = new PopupMenu(cv.getContext(), itemView);
+
+                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        @Override
+                        public boolean onMenuItemClick(MenuItem item) {
+                            switch (item.getItemId()) {
+                                case R.id.modificartarea:
+                                    accionesTarea.modificar(tarea);
+                                    return true;
+                                case R.id.eliminartarea:
+                                    accionesTarea.eliminar(tarea);
+                                    return true;
+                                default:
+                                    return false;
+                            }
+                        }
+                    });
+                    // here you can inflate your menu
+                    popup.inflate(R.menu.context_menu);
+                    popup.setGravity(Gravity.RIGHT);
+                    popup.show();
+                    return false;
+                }
+
+            });
+        }
+    }
     // inflates the row layout from xml when needed
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = mInflater.inflate(R.layout.recyclerview_row, parent, false);
-        return new ViewHolder(view);
+    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.card_tarea, viewGroup, false);
+        ViewHolder pvh = new ViewHolder(v,accionesTarea);
+        return pvh;
     }
 
     // binds the data to the TextView in each row
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        String animal = String.valueOf(mData.get(position));
-        holder.myTextView.setText(animal);
+    public void onBindViewHolder(ViewHolder viewHolder, int i) {
+        viewHolder.mostrarTarea(items.get(i));
     }
 
-    // total number of rows
+//    public MyRecyclerViewAdapter(MainActivity mainActivity, ArrayList<Tarea> items) {
+//        this.items = items;
+//    }
+
+
     @Override
     public int getItemCount() {
-        return mData.size();
+        return items.size();
     }
 
-
-    // stores and recycles views as they are scrolled off screen
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView myTextView;
-
-        ViewHolder(View itemView) {
-            super(itemView);
-            myTextView = itemView.findViewById(R.id.tvAnimalName);
-            itemView.setOnClickListener(this);
-
-        }
-
-        @Override
-        public void onClick(View view) {
-            if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
-        }
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
     }
 
-    // convenience method for getting data at click position
-    String getItem(int id) {
-        return String.valueOf(mData.get(id));
-    }
-
-    // allows clicks events to be caught
-    void setClickListener(ItemClickListener itemClickListener) {
-        this.mClickListener = itemClickListener;
-    }
-
-    // parent activity will implement this method to respond to click events
-    public interface ItemClickListener {
-        void onItemClick(View view, int position);
-    }
 }

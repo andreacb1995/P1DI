@@ -1,26 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_item_edition"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
 
-    <EditText
-        android:id="@+id/tarea"
-        android:inputType="textEmailAddress"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginBottom="4dp"
-         />
     <TextView
-        android:id="@+id/fecha"
-        android:inputType="textPassword"
+        android:id="@+id/añadirEntrenamiento"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginBottom="16dp"
-        android:fontFamily="sans-serif" />
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="32dp"
+        android:autofillHints=""
+        android:ems="10"
+        android:fontFamily="sans-serif"
+        android:inputType="none"
+        android:text="Añadir tarea"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="17dp"
+        android:textStyle="bold"
+        tools:ignore="TextViewEdits" />
+
+    <TextView
+        android:id="@+id/tituloFecha"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="3dp"
+        android:layout_weight="1"
+        android:fontFamily="sans-serif"
+        android:textColor="#000000"
+        android:text="Fecha"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <TextView android:id="@+id/tvFecha"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:layout_weight="1"
+        android:hint="Fecha"
+        android:maxLines="1"
+        android:textColor="#000000"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="3dp"
+        android:autofillHints=""
+        android:inputType="textPersonName"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:textSize="12sp" />
+
+
+
+    <TextView
+        android:id="@+id/tarea"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="3dp"
+        android:layout_weight="1"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif"
+        android:text="Tarea"
+        android:textSize="14sp"
+        android:textStyle="bold"/>
+
+    <EditText android:id="@+id/edTarea"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:ems="10"
+        android:layout_weight="1"
+        android:hint="Tarea"
+        android:maxLines="1"
+        android:textColor="#000000"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="32dp"
+        android:autofillHints=""
+        android:textSize="12sp"/>
+
+
 </LinearLayout>
+

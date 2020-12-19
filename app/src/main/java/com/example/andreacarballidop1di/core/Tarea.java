@@ -1,12 +1,23 @@
 package com.example.andreacarballidop1di.core;
 
-public class Tarea {
-    String textotarea;
-    String fecha;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-    public Tarea(String textotarea, String fecha) {
-        this.textotarea = textotarea;
+public class Tarea {
+    Date fecha;
+    String textotarea;
+
+
+    public Tarea(Date fecha,String textotarea) {
         this.fecha = fecha;
+        this.textotarea = textotarea;
+
+    }
+
+    public void modificarTarea(Date fecha, String textotarea) {
+        this.fecha = fecha;
+        this.textotarea = textotarea;
+
     }
 
     public String getTextotarea() {
@@ -17,17 +28,25 @@ public class Tarea {
         this.textotarea = textotarea;
     }
 
-    public String getFecha() {
+    public Date getFecha() {
         return fecha;
     }
 
-    public void setFecha(String fecha) {
+    public void setFecha(Date fecha) {
         this.fecha = fecha;
     }
 
-    @Override
-    public String toString() {
-        return "Tarea':" + textotarea + '\'' +
-                ", fecha:" + fecha;
+
+    public String getFormatoFecha() {
+
+
+        SimpleDateFormat formatoFecha = new SimpleDateFormat("dd 'de' MMMM 'de' yyyy");
+        return formatoFecha.format(fecha);
+
+    }
+
+    public String eliminarTarea(){
+        String texto= "Fecha: " + getFormatoFecha()+"\n"+ "Tarea: "+ getTextotarea();
+        return texto;
     }
 }
